@@ -100,11 +100,14 @@ int BackTraj::ComuteSinglePer6h(string yesterday_nc, string today_nc, int cur_ti
 
         auto reader = today_reader;
         cur_location = cur_location_tmp;//每次从源点发射
+        cur_time = cur_time_tmp - (6*j);//下一次发射开始时间
         single_traj.clear();
         single_traj.push_back(cur_location);
         for (int i = 0; i < 23; ++i) {
             if((j == 1 && i == 17) || ((j == 2 && i == 11)) || ((j == 3 && i == 5))){
                 reader = yesterday_reader;
+                std::cout << " i = "<<i <<"   "<<"j = "<< j << 
+                    "  current time : " << cur_time << std::endl;
                 cur_time = cur_time_tmp;
             }
 
@@ -132,18 +135,15 @@ int BackTraj::ComuteSinglePer6h(string yesterday_nc, string today_nc, int cur_ti
             
             single_traj.push_back(next_location);
             cur_location = next_location;
-            cur_time -= 1;
-            std::cout << "Step " << i + 1 << ": Latitude = " << next_location.latitude << ", Longitude = " <<
-                next_location.longitude << ", Level = " << next_location.level << std::endl;
+            
+            cur_time--;
+            // std::cout << "Step " << i + 1 << ": Latitude = " << next_location.latitude << ", Longitude = " <<
+            //     next_location.longitude << ", Level = " << next_location.level << std::endl;
         }
 
         trajlist.push_back(single_traj);
 
-        cur_time = cur_time_tmp - 6;//下一次发射开始时间
     }
-
-
-    
 
     return 0;
 }
@@ -159,12 +159,14 @@ int BackTraj::parse_uvw(NetCDFReader* reader,int time, float level, float latitu
         return -1;
     }
     auto indexs = std::make_tuple(time_index,levIndex,latIndex,lonIndex);//0 2 82 188
+
     float u = reader->getVar(indexs,"u");
-    std::cout << "the indexs is :" << time_index << " " << levIndex << " "<< latIndex << " "<< lonIndex << " and the u is : "<< u << std::endl;
     float v = reader->getVar(indexs,"v");
-    std::cout << "the indexs is :" << time_index << " " << levIndex << " "<< latIndex << " "<< lonIndex << " and the v is : "<< v << std::endl;
     float w = reader->getVar(indexs,"w");
-    std::cout << "the indexs is :" << time_index << " " << levIndex << " "<< latIndex << " "<< lonIndex << " and the w is : "<< w << std::endl;
+
+    // std::cout << "the indexs is :" << time_index << " " << levIndex << " "<< latIndex << " "<< lonIndex << " and the v is : "<< v << std::endl;
+    // std::cout << "the indexs is :" << time_index << " " << levIndex << " "<< latIndex << " "<< lonIndex << " and the u is : "<< u << std::endl;
+    // std::cout << "the indexs is :" << time_index << " " << levIndex << " "<< latIndex << " "<< lonIndex << " and the w is : "<< w << std::endl;
 
     wind.u_wind = u;
     wind.v_wind = v;

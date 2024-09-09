@@ -198,7 +198,7 @@ int NetCDFReader::Nc4dReader(const string &value_name,vector<vector<vector<vecto
                 vector<vector<vector<float>>> value_3d(dim1_,vector<vector<float>>(dim2_,vector<float>(dim3_,0)));
 
                 data.getVar(startp, countp, value_3d_tmp);
-                cout << "Data at time " << time << ", level 0, lat 0, lon 0: " << value_3d_tmp[0][0][0] * scale + offset<< endl;
+                // cout << "Data at time " << time << ", level 0, lat 0, lon 0: " << value_3d_tmp[0][0][0] * scale + offset<< endl;
                 // cout << "value_3d[1][0][0] = " << value_3d_tmp[1][0][0] <<endl;
                 for (int i = 0; i < dim1_; ++i) {
                     for (int j = 0; j < dim2_; ++j) {
