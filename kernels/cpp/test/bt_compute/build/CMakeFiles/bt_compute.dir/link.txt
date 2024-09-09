@@ -1,1 +1,0 @@
-/usr/bin/c++  -std=c++11 -fsanitize=address -fno-omit-frame-pointer -g CMakeFiles/bt_compute.dir/bt_compute.cpp.o -o bt_compute  /usr/lib/x86_64-linux-gnu/libpython3.10.so 

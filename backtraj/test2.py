@@ -4,22 +4,19 @@ import os
 import pandas as pd
 import cdsapi
 # 定义数据存储路径
-directory = '/mnt/d/学习资料/气象数据/era5s/202304'  # 请替换为实际的文件路径
+directory = '/mnt/d/学习资料/气象数据/era5s/'  # 请替换为实际的文件路径
 
 variables = {'uwnd': 'u_component_of_wind',
              'vwnd': 'v_component_of_wind',
              'sh': 'specific_humidity',
              'omega': 'vertical_velocity'}
 field_era = ['u_component_of_wind','v_component_of_wind','specific_humidity','vertical_velocity']
-
-level = [600,550,500,450,400]
-
-# level = [1000,950,900,850,800,750,700,\
-# 650,600,550,500,450,400,350,300,250,200,\
-# 150,100,70,50,30,20,10,7,5,3,2,1]
-
+level = [1000,950,900,850,800,750,700,\
+650,600,550,500,450,400,350,300,250,200,\
+150,100,70,50,30,20,10,7,5,3,2,1]
 level_vector = [f'{i}' for i in level]
 
+time_range = pd.date_range('2022-12-28', '2023-02-01', freq='D')
 
 def create_download_path(path):
     # function to create a new directory path
@@ -28,7 +25,7 @@ def create_download_path(path):
 
 create_download_path(directory)
 
-time_range = pd.date_range('2023-04-01', '2023-04-30', freq='D')
+time_range = pd.date_range('2022-12-28', '2023-02-01', freq='D')
 
 # define the geographic limits for downloading the information
 lat_min = 20
@@ -65,3 +62,8 @@ for i, date in enumerate(time_range):
             },
             # specify the path to save the downloaded file
             f'{path_i}{file_i}')
+
+
+
+
+

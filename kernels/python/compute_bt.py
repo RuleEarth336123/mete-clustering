@@ -199,6 +199,25 @@ class BackTraj:
         
         return next_point
 
+class Btcompute(BackTraj):
+    def __init__(self, nc_path: str, start_time, start_point: Point) -> None:
+        super().__init__(nc_path, start_time, start_point)
+
+    '''
+    folder : 下载的气象文件目录
+    start_time : 计算开始时间(例如23)
+    start_point : 计算起始位置(例如Point(39.5,-28.1,500.0))
+    hour : 间隔时间，即美多少小时计算一次轨迹
+    '''
+    def compute(folder,start_time,start_point:Point,hour):
+        
+        return
+
+
+
+
+
+
 
 
 # 假设Point和Wind类的定义如下：

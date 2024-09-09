@@ -1,0 +1,17 @@
+{
+    "hyst_std": {
+        "starting time": [
+            23,
+            2,
+            2,
+            23
+        ],
+        "number of starting locations": 1,
+        "starting location": "39.5 -28.1 500",
+        "total run time": -48,
+        "vertical": 2000,
+        "top of model domain": 2000,
+        "number of input grids": 7,
+        "gdas path": "E:/MeteorologicalData/GDAS/filelists"
+    }
+}

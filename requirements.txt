@@ -1,0 +1,9 @@
+numpy 
+pandas
+matplotlib 
+pyproj
+scikit-learn 
+tqdm 
+basemap 
+fastdtw 
+chardet 

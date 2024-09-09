@@ -1,3 +1,0 @@
-/home/hikaka/mete-clustering/cpp/test/bt_compute/build/CMakeFiles/bt_compute.dir
-/home/hikaka/mete-clustering/cpp/test/bt_compute/build/CMakeFiles/edit_cache.dir
-/home/hikaka/mete-clustering/cpp/test/bt_compute/build/CMakeFiles/rebuild_cache.dir

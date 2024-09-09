@@ -1,10 +1,26 @@
-cmake_minimum_required (VERSION 2.8)
-set(CMAKE_C_COMPILER   /usr/bin/gcc)
-set(CMAKE_CXX_COMPILER /usr/bin/g++)
+cmake_minimum_required(VERSION 3.22.1)
+# set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project (demo)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-add_executable(main dtw.cpp main.cpp)
-#add_executable(main tmp.cpp)
+project(main)
 
 
+set(NETCDF_INCLUDE_DIRS "/usr/local/include")
+set(HTTPCPP_INCLUDE_DIRS "/usr/local/include")
+set(JSON11_INCLUDE_DIRS "/usr/include/x86_64-linux-gnu")
+
+set(NETCDF_LIBRARIES "/usr/local/lib/libnetcdf-cxx4.so")
+set(JSON11_LIBRARIES "/usr/lib/x86_64-linux-gnu/libjson11.a")
+
+
+
+
+# 添加头文件目录
+include_directories(${NETCDF_INCLUDE_DIRS} ${JSON11_INCLUDE_DIRS})
+
+# 添加可执行文件
+add_executable(main bt_compute.cpp era5_reader.cpp http_handler.cpp main.cpp)
+
+# 链接动态库
+target_link_libraries(main ${NETCDF_LIBRARIES} ${JSON11_LIBRARIES})
