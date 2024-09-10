@@ -3,8 +3,11 @@ cmake_minimum_required(VERSION 3.22.1)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(main)
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+# 为 Debug 构建类型设置调试选项
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
 
+project(main)
 
 set(NETCDF_INCLUDE_DIRS "/usr/local/include")
 set(HTTPCPP_INCLUDE_DIRS "/usr/local/include")

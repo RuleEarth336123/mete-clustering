@@ -80,7 +80,7 @@ int main1(int argc,char* argv[]){
     reader->Nc3dReader("SO2CMASS",value_3d);
 
 #endif
-#if 0
+#if 1
     std::unique_ptr<NetCDFReader>  reader = std::make_unique<NetCDFReader>(
         "/mnt/d/学习资料/气象数据/era5s/202301/20230101.nc",24,5,161,301
     );
@@ -97,7 +97,7 @@ int main1(int argc,char* argv[]){
     std::cout << "the indexs is :" << time_index << " " << levIndex << " "<< latIndex << " "<< lonIndex << " and the value is : "<< value << std::endl;;
 #endif
 
-#if 1
+#if 0
 
 
 

@@ -37,9 +37,9 @@ public:
 
     
 private:
-    int bin_select_lat(const vector<float>& nums,int target,bool is_seq = true);
-    int bin_select_lon(const vector<float>& nums,int target,bool is_seq = true);
-    int seq_select_lev(const vector<float>& nums,int target,bool is_seq = true);
+    int bin_select_lat(const vector<float>& nums,float target,bool is_seq = true);
+    int bin_select_lon(const vector<float>& nums,float target,bool is_seq = true);
+    int seq_select_lev(const vector<float>& nums,float target,bool is_seq = true);
     int seq_select_time(const vector<float>& nums,int target,bool is_seq = true);
 
 private:

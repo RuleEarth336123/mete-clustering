@@ -221,8 +221,9 @@ int NetCDFReader::Nc4dReader(const string &value_name,vector<vector<vector<vecto
     return 0;
 }
 
-int NetCDFReader::bin_select_lat(const vector<float> &nums, int target, bool is_seq)
+int NetCDFReader::bin_select_lat(const vector<float> &nums, float target, bool is_seq)
 {
+#if 0
     int low = 0;
     int high = nums.size() - 1;
     int closest_index = -1;
@@ -248,7 +249,8 @@ int NetCDFReader::bin_select_lat(const vector<float> &nums, int target, bool is_
     }
 
     return closest_index;
-#if 0
+#endif
+#if 1
     int low = 0;
     int high = nums.size() - 1;
     while (low <= high) {
@@ -263,39 +265,9 @@ int NetCDFReader::bin_select_lat(const vector<float> &nums, int target, bool is_
     }
     return -1; 
 #endif
-#if 0
-    // 由于nums是倒序的，需要反转迭代器的方向
-    auto it = std::lower_bound(nums.rbegin(), nums.rend(), target - 0.125,
-        [](float a, float b) { return a < b; }); 
-    
-    // 计算与target最近的索引
-    int index = -1;
-    float min_diff = std::numeric_limits<float>::max();
-    
-    if (it != nums.rend()) {
-        // 检查当前找到的元素是否在允许的范围内
-        float diff = std::abs(*it - target);
-        if (diff < min_diff) {
-            min_diff = diff;
-            index = std::distance(nums.rbegin(), it);
-        }
-        
-        // 检查前一个元素（如果存在）
-        if (it != nums.rbegin()) {
-            auto prev_it = std::next(it);
-            diff = std::abs(*prev_it - target);
-            if (diff < min_diff) {
-                min_diff = diff;
-                index = std::distance(nums.rbegin(), prev_it);
-            }
-        }
-    }
-    
-    return index;
-#endif
 }
 
-int NetCDFReader::bin_select_lon(const vector<float> &nums, int target, bool is_seq)
+int NetCDFReader::bin_select_lon(const vector<float> &nums, float target, bool is_seq)
 {
 #if 1
     int low = 0;
@@ -343,7 +315,7 @@ int NetCDFReader::bin_select_lon(const vector<float> &nums, int target, bool is_
 #endif    
 }
 
-int NetCDFReader::seq_select_lev(const vector<float> &nums, int target, bool is_seq)
+int NetCDFReader::seq_select_lev(const vector<float> &nums, float target, bool is_seq)
 {
     int mLevIndex = -1;  // 初始化为-1，表示未找到
     float min_diff = std::numeric_limits<float>::infinity(); 

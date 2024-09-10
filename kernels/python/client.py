@@ -6,30 +6,42 @@ import os
 import numpy as np
 import os
 import time
-class Point:
-    def __init__(self, latitude, longitude, level):
-        self.longitude = longitude
-        self.latitude = latitude
-        self.level = level
-    
-    def copy(self):
-        return Point(self.longitude, self.latitude, self.level)
+def bezier_smoothing(points, num=100):
+    # 计算贝塞尔曲线的控制点
+    n = len(points)
+    control_points = [points[0]] + [(points[i] + points[i - 1]) / 2.0 for i in range(1, n - 1)] + [points[-1]]
+    control_points = np.array(control_points)[:, :2]  # 只保留x和y坐标
 
-class Wind:
-    def __init__(self, u_wind, v_wind, w_wind):
-        self.u_wind = u_wind
-        self.v_wind = v_wind
-        self.w_wind = w_wind
+    # 计算贝塞尔曲线上的点
+    t = np.linspace(0, 1, num)
+    curve_points = np.zeros((num, 2))
+
+    for i in range(num):
+        curve_point = np.zeros(2)
+        for j in range(len(control_points)):
+            binomial_coeff = np.math.factorial(n - 1) / (np.math.factorial(j) * np.math.factorial(n - 1 - j))
+            curve_point += binomial_coeff * (t[i] ** j) * ((1 - t[i]) ** (n - 1 - j)) * control_points[j]
+        curve_points[i] = curve_point
+
+    # 将结果转换为所需的格式
+    smooth_traj_segments = [curve_points[i:i+1].tolist() for i in range(len(curve_points))]
+
+    return smooth_traj_segments
+
 
 class BackTraj:
     def compute_multi_traj(self,TrajGroup) -> list:
 
+        interpolated_traj_group = []
+        
+        np.save('kernels/python/cache/TrajGroup.npy', TrajGroup)   
+        TrajGroup = np.load('kernels/python/cache/TrajGroup.npy',allow_pickle=True)
 
-        # np.save('kernels/python/cache/TrajGroup.npy', TrajGroup)   
-        # TrajGroup = np.load('kernels/python/cache/TrajGroup.npy',allow_pickle=True)
+        for traj in TrajGroup:
+            curve_points = bezier_smoothing(traj,24)
+            interpolated_traj_group.append(curve_points)
 
-
-        interpolated_traj_group = np.array(TrajGroup)
+        interpolated_traj_group = np.array(interpolated_traj_group)
 
         # 绘图部分
         lat_min, lat_max= 20, 60
@@ -43,8 +55,8 @@ class BackTraj:
         # 绘制每个轨迹
         for i,Traj in enumerate(interpolated_traj_group):
             # 提取轨迹中所有点的经度和纬度
-            lons = [point[1] for point in Traj]
-            lats = [point[0] for point in Traj]
+            lons = [point[0][1] for point in Traj]
+            lats = [point[0][0] for point in Traj]
 
             concatenated_array = np.concatenate([arr.flatten() for arr in lats])
             lats = concatenated_array.tolist()
@@ -57,9 +69,9 @@ class BackTraj:
             
             map.plot(x, y, color=colors, alpha=1,linewidth=0.2)
         
-        plt.title('Back Trajectories')
-        plt.savefig("res/pics/202301.pdf")      
-        return
+        plt.title('Back Trajectories 202303 smooth')
+        plt.savefig("res/pics/202303.pdf")      
+        return 
 
 
     def compute_single_traj(self,TrajGroup) -> list:
@@ -150,10 +162,10 @@ def compute1h():
 
 url = 'http://localhost:12123/compute/6h'
 def compute6h(folder):
-    folder = "/mnt/d/学习资料/气象数据/era5s/202301"
     filelist = os.listdir(folder)
     TrajGroups = []
     obj = BackTraj()
+    start = time.time()
     
     for i,file in enumerate(filelist):
         files = []
@@ -178,15 +190,11 @@ def compute6h(folder):
             'Content-Type': 'application/json'
         }
 
-
         response = requests.post(url, data=json_data, headers=headers)
-
-        start = time.time()
 
         print('Status Code:', response.status_code)
         # print('Response Body:', response.text)
-        end = time.time()
-        print(f"compute use time : {end - start}" )
+
 
         if response.status_code == 200:
             response_json = json.loads(response.text)
@@ -200,11 +208,16 @@ def compute6h(folder):
     
     obj.compute_multi_traj(TrajGroups)
     
+    end = time.time()
+    print(f"compute use time : {end - start}" ) 
+     
     return None
 
 
-compute6h('/mnt/d/学习资料/气象数据/era5s/202301')
+compute6h('/mnt/d/学习资料/气象数据/era5s/202303')
 
+
+# BackTraj().compute_multi_traj([]);
 
 
 
