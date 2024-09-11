@@ -23,7 +23,7 @@ set(JSON11_LIBRARIES "/usr/lib/x86_64-linux-gnu/libjson11.a")
 include_directories(${NETCDF_INCLUDE_DIRS} ${JSON11_INCLUDE_DIRS})
 
 # 添加可执行文件
-add_executable(main bt_compute.cpp era5_reader.cpp http_handler.cpp main.cpp)
+add_executable(main bt_compute.cpp era5_reader.cpp http_handler.cpp features.cpp main.cpp)
 
 # 链接动态库
 target_link_libraries(main ${NETCDF_LIBRARIES} ${JSON11_LIBRARIES})

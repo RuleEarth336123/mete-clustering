@@ -1,4 +1,3 @@
-#include "dtw.h"
 #include "bt_compute.h"
 // #include "era5_reader.h"
 #include <emmintrin.h>
@@ -7,7 +6,7 @@
 #include <tuple>
 #include <cstdlib>
 #include "http_handler.h"
-
+#include "features.h"
 using namespace std;
 
 int initServer(int port = 12123)
@@ -16,6 +15,7 @@ int initServer(int port = 12123)
 
     svr.Post("/compute/1h", handleSingleCompute);
     svr.Post("/compute/6h", handleComputePer6h);
+    svr.Post("/cluster/feature", handleComputeFeatures);
 
     if (svr.listen("0.0.0.0", port)) {
         std::cout << "Server is running at http://localhost:12123" << std::endl;
@@ -161,9 +161,28 @@ int main2(int argc,char* argv[]){
     //     std::cout << "Latitude: " << point.latitude << ", Longitude: " << point.longitude << ", Level: " << point.level << std::endl;
     // }
 }
+std::vector<std::vector<Point>> generateTrajectories(int numTrajectories) {
+    std::vector<std::vector<Point>> trajectories;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(-10, 10);
+
+    for (int i = 0; i < numTrajectories; ++i) {
+        std::vector<Point> trajectory;
+        for (int j = 0; j < 3; ++j) {
+            float x = dis(gen);
+            float y = dis(gen);
+            float z = dis(gen);
+            trajectory.push_back(Point(x, y, z));
+        }
+        trajectories.push_back(trajectory);
+    }
+
+    return trajectories;
+}
 
 int main(int argc,char* argv[]){
-
+#if 1
     int port;
 
     for (int i = 1; i < argc; ++i) {
@@ -175,6 +194,59 @@ int main(int argc,char* argv[]){
     }
 
     initServer(port);
-    
+#endif
+#if 0
+    FeatureComputer featureComputer;
+    // std::vector<std::vector<Point>> inputMatrix = {
+    //     {Point(0, 0, 0), Point(1, 1, 0), Point(2, 2, 0)},
+    //     {Point(0, 0, 0), Point(1, 1, 0), Point(3, 3.1, 0)},
+    //     {Point(0, 0, 0), Point(2, 2, 0), Point(4, 4.2, 0)},
+    //     {Point(0, 10,0), Point(1, 2, 0), Point(3, 3, 0)},
+    //     {Point(0, 0, 0), Point(1, 12.7,0), Point(3, 3, 0)},
+    //     {Point(0, 0, 0), Point(1, 2, 0), Point(13, 4, 0)},
+    //     {Point(0, 0, 0), Point(1, 2, 0), Point(3, 4, 0)},
+    //     {Point(0, 0, 0), Point(1, 2, 0), Point(3, 4, 0)},
+    //     {Point(0, 0, 0), Point(1, 2, 0), Point(3, 4, 0)}
+    // };
+    std::vector<std::vector<Point>> inputMatrix = generateTrajectories(20000);
+
+    // cout << "打印输入矩阵 --------" << endl;
+    // for (const auto& trajectory : inputMatrix) {
+    //     for (const auto& point : trajectory) {
+    //         std::cout << "(" << point.latitude << ", " << point.longitude << ", " << point.level << ") ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    std::vector<std::vector<float>> distanceMatrix,normalizedMatrix;
+    using namespace std::chrono;
+    auto start = high_resolution_clock::now();
+    featureComputer.DtwCompute(inputMatrix,distanceMatrix);
+
+
+    // cout << "打印距离矩阵 --------" << endl;
+
+    // for (const auto& row : distanceMatrix) {
+    //     for (const auto& val : row) {
+    //         std::cout << val << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+
+    featureComputer.NormalizeFeatures(distanceMatrix, normalizedMatrix);
+
+    // cout << "打印特征矩阵 --------" << endl;
+    // // 打印归一化矩阵
+    // for (const auto& row : normalizedMatrix) {
+    //     for (const auto& val : row) {
+    //         std::cout << val << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+
+    auto end = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(end - start).count();
+    std::cout << "compute features Elapsed time: " << duration << " milliseconds" << std::endl;
+
+#endif
     return 0;
 }

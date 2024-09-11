@@ -1,5 +1,6 @@
 #include "http_handler.h"
 #include "bt_compute.h"
+#include "features.h"
 #include "json11.hpp"
 
 using json11::Json;
@@ -138,8 +139,6 @@ void handleComputePer6h(const httplib::Request &req, httplib::Response &res)
     std::unique_ptr<BackTraj> bt = std::make_unique<BackTraj>();
     bt->InitNc(2, yesterday_nc.c_str(),today_nc.c_str());
 
-
-
     Point cur_loc(latitude, longitude, level);
     std::vector<std::vector<Point>> trajectorys;
     bt->ComuteSinglePer6h(yesterday_nc,today_nc, hour, cur_loc, 3600.0f,trajectorys);
@@ -161,4 +160,64 @@ void handleComputePer6h(const httplib::Request &req, httplib::Response &res)
     std::string response_string = responseJson.dump();
     res.set_content(responseJson.dump(), "application/json");
     std::cout << log(req,res) << std::endl;;
+}
+
+void handleComputeFeatures(const httplib::Request &req, httplib::Response &res)
+{
+    string err;
+
+    Json requestJson = Json::parse(req.body, err);
+    if (!err.empty()) {
+        res.set_content("Invalid JSON", "text/plain");
+        res.status = 400; // Bad Request
+        return;
+    }
+    vector<std::vector<Point>> inputMatrix;
+
+    auto trajectories = requestJson["trajectories"].array_items();
+
+
+    for (const auto& trajectory : trajectories) {
+        // 遍历轨迹中的点
+        vector<Point> single_traj;
+        for (const auto& point : trajectory.array_items()) {
+            // 获取点的坐标
+            float x = point[0].number_value();
+            float y = point[1].number_value();
+            float z = point[2].number_value();
+            Point loc(x, y, z);
+            single_traj.emplace_back(loc);
+            // 输出点的坐标
+            //std::cout << "Point: (" << x << ", " << y << ", " << z << ")" << std::endl;
+        }
+        inputMatrix.emplace_back(std::move(single_traj));
+    }
+
+    std::unique_ptr<FeatureComputer> feature_ptr = std::make_unique<FeatureComputer>();
+
+    vector<vector<float>> distanceMatrix,normalizedMatrix;
+    vector<vector<float>> output_marix;
+
+    feature_ptr->DtwCompute(inputMatrix,distanceMatrix);
+    feature_ptr->NormalizeFeatures(distanceMatrix, normalizedMatrix);
+
+
+    vector<vector<json11::Json>> json_feature_list;
+
+    for (const auto& feature : normalizedMatrix) {
+        std::vector<json11::Json> json_feature;
+        for (const auto& value : feature) {
+            json_feature.push_back(value);
+        }
+        json_feature_list.push_back(json_feature);
+    }
+
+    // 创建响应的Json对象
+    json11::Json responseJson = json11::Json::object {
+        {"features", json_feature_list}
+    };
+
+    std::string response_string = responseJson.dump();
+    res.set_content(responseJson.dump(), "application/json");
+    std::cout << log(req,res) << std::endl;
 }
