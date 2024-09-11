@@ -4,8 +4,16 @@ from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 import os
 import numpy as np
-import os
 import time
+from tqdm import tqdm
+import pandas as pd
+
+from joblib import Parallel, delayed
+from scipy.interpolate import UnivariateSpline
+from sklearn.cluster import KMeans
+from mpl_toolkits.basemap import Basemap
+import matplotlib.pyplot as plt
+
 def bezier_smoothing(points, num=100):
     # 计算贝塞尔曲线的控制点
     n = len(points)
@@ -108,6 +116,54 @@ class BackTraj:
         plt.savefig("res/pics/bt.pdf")      
         return
 
+def KMeansCluster2(TrajGroups,features,num_clusters) -> None:  
+
+    data_list = TrajGroups
+
+    kmeans = KMeans(n_clusters=num_clusters)
+    labels = kmeans.fit_predict(features)
+    cluster_centers = []
+
+    def compute_cluster_center(i, data_list, labels):
+        return np.mean(np.array([data_list[j] for j in range(len(data_list)) if labels[j] == i]), axis=0)
+    
+    cluster_centers = Parallel(n_jobs=-1)(delayed(compute_cluster_center)(i, data_list, labels) for i in tqdm(range(num_clusters)))
+
+    lat_min, lat_max= 20, 60
+    lon_min, lon_max = -75, 0
+    map = Basemap(projection='merc', llcrnrlon=(lon_min), llcrnrlat=(lat_min), urcrnrlon=(lon_max), urcrnrlat=(lat_max), resolution='l')
+    map.drawcoastlines()
+    map.drawcountries()
+    colors = ['g', 'r', 'b', 'r', 'y', 'k']
+    
+    for i, (center, color) in enumerate(zip(cluster_centers, colors)):
+        lons, lats = center[:, 1], center[:, 0]
+        x, y = map(lons, lats)
+        map.plot(x, y, color=color, linewidth=2)
+        cluster_indices = np.where(labels == i)[0]
+        for index in cluster_indices:
+            trajectory = data_list[index]
+            
+            lons = [point[1] for point in trajectory]
+            lats = [point[0] for point in trajectory]
+            
+            x, y = map(lons, lats)
+            map.plot(x, y, color=color, linestyle='dashed', linewidth=0.3)
+    
+    specific_lat, specific_lon = 39.500, -28.100
+
+    # 转换坐标
+    specific_x, specific_y = map(specific_lon, specific_lat)
+
+    # 绘制特定点
+    map.scatter(specific_x, specific_y, color='red', s=5, marker='o', edgecolors='black', alpha=1)
+
+    plt.text(specific_x, -10000, f'Longitude: {specific_lon:.2f}', fontsize=10, color='black', ha='center')
+    plt.text(-10000, specific_y, f'Latitude: {specific_lat:.2f}', fontsize=10, color='black', va='center')
+    plt.title('Trajectories Cluster')
+    plt.show()
+    plt.savefig("res/pics/cluster2023202.pdf")
+    return None 
 
 def compute1h():
     # 定义 URL 和端口
@@ -158,10 +214,8 @@ def compute1h():
     else:
         print('Failed to get a valid response from the server.')
     return
-
-
-url = 'http://localhost:12123/compute/6h'
 def compute6h(folder):
+    url = 'http://localhost:12123/compute/6h'
     filelist = os.listdir(folder)
     TrajGroups = []
     obj = BackTraj()
@@ -211,13 +265,49 @@ def compute6h(folder):
     end = time.time()
     print(f"compute use time : {end - start}" ) 
      
-    return None
+    return TrajGroups
+
+def computefeatures(TrajGroups):
+    url = 'http://localhost:12123/cluster/feature'
+
+    start = time.time()
+    
+    data = {"trajectories": TrajGroups}
+
+    # 将字典转换为JSON字符串
+    json_data = json.dumps(data, indent=4)
+    
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    response = requests.post(url, data=json_data, headers=headers)
+
+    print('Status Code:', response.status_code)
+
+    if response.status_code == 200:
+        response_json = json.loads(response.text)
+        features = response_json['features']
+        
+    else:
+        print('Failed to get a valid response from the server.')
 
 
-compute6h('/mnt/d/学习资料/气象数据/era5s/202303')
+    end = time.time()
+    print(f"compute features use time : {end - start}" ) 
+     
+    return features
 
 
-# BackTraj().compute_multi_traj([]);
+
+
+
+
+TrajGroups = compute6h('/mnt/d/学习资料/气象数据/era5s/202302')
+# np.save('kernels/python/cache/TrajGroups.npy', TrajGroups)
+# TrajGroups = np.load('kernels/python/cache/TrajGroups.npy')
+features = computefeatures(TrajGroups)
+KMeansCluster2(TrajGroups,features,3)
 
 
 

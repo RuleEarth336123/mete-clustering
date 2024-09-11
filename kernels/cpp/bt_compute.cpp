@@ -1,5 +1,7 @@
 #include "bt_compute.h"
 
+std::unique_ptr<BackTraj> BackTraj::instance = nullptr;
+std::mutex BackTraj::mutex;
 void BackTraj::InitNc(int num,...)
 {
     va_list args;
@@ -208,3 +210,4 @@ float BackTraj::deg2rad(float degrees)
 {
     return degrees * static_cast<float>(M_PI) / 180.0f;
 }
+

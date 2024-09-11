@@ -11,6 +11,7 @@ using namespace std;
 
 int initServer(int port = 12123)
 {
+    
     httplib::Server svr;
 
     svr.Post("/compute/1h", handleSingleCompute);
@@ -181,7 +182,7 @@ std::vector<std::vector<Point>> generateTrajectories(int numTrajectories) {
     return trajectories;
 }
 
-int main(int argc,char* argv[]){
+int main4(int argc,char* argv[]){
 #if 1
     int port;
 
@@ -249,4 +250,13 @@ int main(int argc,char* argv[]){
 
 #endif
     return 0;
+}
+
+
+int main(void){
+#if 1
+    initServer(12123);
+#endif
+    return 0;
+
 }

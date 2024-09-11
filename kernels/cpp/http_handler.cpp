@@ -136,7 +136,9 @@ void handleComputePer6h(const httplib::Request &req, httplib::Response &res)
         return;
     }
 
-    std::unique_ptr<BackTraj> bt = std::make_unique<BackTraj>();
+    //std::unique_ptr<BackTraj> bt = std::make_unique<BackTraj>();
+    BackTraj* bt = BackTraj::getInstance();
+
     bt->InitNc(2, yesterday_nc.c_str(),today_nc.c_str());
 
     Point cur_loc(latitude, longitude, level);

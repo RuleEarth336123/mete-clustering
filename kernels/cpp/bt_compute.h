@@ -8,6 +8,7 @@
 #include <memory>
 #include <cstdarg>
 #include "json11.hpp"
+#include <mutex>
 
 using std::string;
 using std::map;
@@ -41,10 +42,25 @@ class BackTraj{
 private:
     string nc_path_;
     map<string, std::unique_ptr<NetCDFReader>> nc_ptrs_map_;
+    static std::unique_ptr<BackTraj> instance;
+    static std::mutex mutex;
 
 public:
 
     BackTraj(){}
+
+    BackTraj(const BackTraj&) = delete;
+    BackTraj& operator=(const BackTraj&) = delete;
+    static BackTraj* getInstance() {
+        if (!instance) {
+            std::lock_guard<std::mutex> lock(mutex);
+            if (!instance) {
+                instance.reset(new BackTraj());
+            }
+        }
+        return instance.get();
+    }
+
     ~BackTraj() = default;
     explicit BackTraj(const std::string& path, const std::string& time, const Point& point)
             : nc_path_(path) {}
@@ -64,7 +80,5 @@ private:
 
 
 };
-
-
 
 #endif

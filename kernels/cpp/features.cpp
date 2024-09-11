@@ -44,19 +44,13 @@ float FeatureComputer::dtw_distance(const std::vector<Point> &trajectory1, const
     std::vector<std::vector<float>> cost(n + 1, std::vector<float>(m + 1, std::numeric_limits<float>::max()));
 
     cost[0][0] = 0;
-
-    for (int i = 1; i <= n; ++i) {
-        cost[i][0] = std::numeric_limits<float>::max();
-    }
-    for (int j = 1; j <= m; ++j) {
-        cost[0][j] = std::numeric_limits<float>::max();
-    }
-
     for (int i = 1; i <= n; ++i) {
         for (int j = 1; j <= m; ++j) {
-            float costDiag = cost[i-1][j-1] + euclidean_distance(trajectory1[i-1], trajectory2[j-1]);
-            float costLeft = cost[i][j-1];
-            float costUp = cost[i-1][j];
+            float eudis = euclidean_distance(trajectory1[i-1], trajectory2[j-1]);
+            //std::cout << "euclidean_distance : "<<eudis <<std::endl;
+            float costDiag = cost[i-1][j-1] + eudis;
+            float costLeft = cost[i][j-1] + eudis;
+            float costUp = cost[i-1][j] + eudis;
             cost[i][j] = std::min({costDiag, costLeft, costUp});
         }
     }
