@@ -182,7 +182,7 @@ std::vector<std::vector<Point>> generateTrajectories(int numTrajectories) {
     return trajectories;
 }
 
-int main4(int argc,char* argv[]){
+int main(int argc,char* argv[]){
 #if 1
     int port;
 
@@ -253,7 +253,7 @@ int main4(int argc,char* argv[]){
 }
 
 
-int main(void){
+int main4(void){
 #if 1
     initServer(12123);
 #endif

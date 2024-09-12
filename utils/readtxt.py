@@ -11,7 +11,7 @@ def SwitchTxtToCsv(folder_path:str):
         file_list.append(item_path)
         
     for file_path in file_list:
-        csv_file_path = "data/0704/202301csv6h/"+ os.path.basename(file_path) +".csv"
+        csv_file_path = "/mnt/d/software/hysplit/2023/csv03/"+ os.path.basename(file_path) +".csv"
         with open(file_path, 'rb') as f:
             result = chardet.detect(f.read()) 
         encoding = result['encoding']
@@ -34,5 +34,5 @@ def SwitchTxtToCsv(folder_path:str):
             print(f"文件 {file_path} 不存在")
     return
 
-file_list = 'data/0704/202301ZD24h'
+file_list = '/mnt/d/software/hysplit/2023/03'
 SwitchTxtToCsv(file_list)

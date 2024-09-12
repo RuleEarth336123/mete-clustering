@@ -787,7 +787,7 @@ def DeepCluster(folder_path:str,num_clusters:int) -> None:
 
 
 def PltOriginCloud(folder_path:str) -> None:
-    draw_traj_basemap(folder_path,'hysplitoritraj.pdf')
+    draw_traj_basemap(folder_path,'hysplit_ori03.pdf')
     return None
 
 def draw_traj_basemap(folder_path,pdfname:str):
@@ -829,15 +829,15 @@ def draw_traj_basemap(folder_path,pdfname:str):
 
     plt.text(specific_x, -10000, f'Longitude: {specific_lon:.2f}', fontsize=10, color='black', ha='center')
     plt.text(-10000, specific_y, f'Latitude: {specific_lat:.2f}', fontsize=10, color='black', va='center')
-    plt.title('Back Trajectories')
-    plt.savefig("pics/"+pdfname)
+    plt.title('hysplit_ori03')
+    plt.savefig("res/pics/"+pdfname)
     plt.close()  # 保存后关闭图形，以避免显示在屏幕上
 
 def Main():
     #HierarchicalCluster('/home/hikaka/mete-clustering/data/48h/1-3m',3)
     #DBScanCluster('data\\48h\\1-3m')
     #KMeansCluster2('data/48h/1-3m',3)
-    KMeansCluster2('data/0704/202301csv6h',4)
-    # PltOriginCloud('data/0704/202301csv6h')
+    #KMeansCluster2('data/0704/202301csv6h',4)
+    PltOriginCloud('/mnt/d/software/hysplit/2023/csv03')
 
 Main()

@@ -197,11 +197,15 @@ void handleComputeFeatures(const httplib::Request &req, httplib::Response &res)
 
     std::unique_ptr<FeatureComputer> feature_ptr = std::make_unique<FeatureComputer>();
 
-    vector<vector<float>> distanceMatrix,normalizedMatrix;
+    vector<vector<float>> distanceMatrix,normalizedMatrix,similarMatrix;
     vector<vector<float>> output_marix;
 
     feature_ptr->DtwCompute(inputMatrix,distanceMatrix);
-    feature_ptr->NormalizeFeatures(distanceMatrix, normalizedMatrix);
+    feature_ptr->CosCompute(inputMatrix,similarMatrix);
+    feature_ptr->DotCompute(distanceMatrix,similarMatrix,output_marix);
+
+
+    feature_ptr->NormalizeFeatures(output_marix, normalizedMatrix);
 
 
     vector<vector<json11::Json>> json_feature_list;

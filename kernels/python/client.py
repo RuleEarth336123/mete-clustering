@@ -48,8 +48,16 @@ class BackTraj:
         for traj in TrajGroup:
             curve_points = bezier_smoothing(traj,24)
             interpolated_traj_group.append(curve_points)
+            
+        trajs2list = []
+        for i,traj in enumerate(interpolated_traj_group):
+            single = []
+            for i,item in enumerate(traj):
+                single.append(traj[i][0])
+            trajs2list.append(single)
 
         interpolated_traj_group = np.array(interpolated_traj_group)
+
 
         # 绘图部分
         lat_min, lat_max= 20, 60
@@ -79,7 +87,7 @@ class BackTraj:
         
         plt.title('Back Trajectories 202303 smooth')
         plt.savefig("res/pics/202303.pdf")      
-        return 
+        return trajs2list
 
 
     def compute_single_traj(self,TrajGroup) -> list:
@@ -137,9 +145,6 @@ def KMeansCluster2(TrajGroups,features,num_clusters) -> None:
     colors = ['g', 'r', 'b', 'r', 'y', 'k']
     
     for i, (center, color) in enumerate(zip(cluster_centers, colors)):
-        lons, lats = center[:, 1], center[:, 0]
-        x, y = map(lons, lats)
-        map.plot(x, y, color=color, linewidth=2)
         cluster_indices = np.where(labels == i)[0]
         for index in cluster_indices:
             trajectory = data_list[index]
@@ -148,7 +153,11 @@ def KMeansCluster2(TrajGroups,features,num_clusters) -> None:
             lats = [point[0] for point in trajectory]
             
             x, y = map(lons, lats)
-            map.plot(x, y, color=color, linestyle='dashed', linewidth=0.3)
+            map.plot(x, y, color=color, linestyle='dashed',linewidth=0.3)
+        lons, lats = center[:, 1], center[:, 0]
+        x, y = map(lons, lats)
+        map.plot(x, y, color=color, linewidth=2)
+        
     
     specific_lat, specific_lon = 39.500, -28.100
 
@@ -160,9 +169,9 @@ def KMeansCluster2(TrajGroups,features,num_clusters) -> None:
 
     plt.text(specific_x, -10000, f'Longitude: {specific_lon:.2f}', fontsize=10, color='black', ha='center')
     plt.text(-10000, specific_y, f'Latitude: {specific_lat:.2f}', fontsize=10, color='black', va='center')
-    plt.title('Trajectories Cluster')
+    plt.title('Trajectories Cluster 2023203')
     plt.show()
-    plt.savefig("res/pics/cluster2023202.pdf")
+    plt.savefig("res/pics/cluster2023203_v1.pdf")
     return None 
 
 def compute1h():
@@ -260,12 +269,12 @@ def compute6h(folder):
         else:
             print('Failed to get a valid response from the server.')
     
-    obj.compute_multi_traj(TrajGroups)
+    trajs2list = obj.compute_multi_traj(TrajGroups)
     
     end = time.time()
     print(f"compute use time : {end - start}" ) 
      
-    return TrajGroups
+    return TrajGroups,trajs2list
 
 def computefeatures(TrajGroups):
     url = 'http://localhost:12123/cluster/feature'
@@ -303,11 +312,11 @@ def computefeatures(TrajGroups):
 
 
 
-TrajGroups = compute6h('/mnt/d/学习资料/气象数据/era5s/202302')
+TrajGroups,trajs2list = compute6h('/mnt/d/学习资料/气象数据/era5s/202303')
 # np.save('kernels/python/cache/TrajGroups.npy', TrajGroups)
 # TrajGroups = np.load('kernels/python/cache/TrajGroups.npy')
 features = computefeatures(TrajGroups)
-KMeansCluster2(TrajGroups,features,3)
+KMeansCluster2(trajs2list,features,3)
 
 
 
