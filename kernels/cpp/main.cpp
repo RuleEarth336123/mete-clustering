@@ -17,6 +17,7 @@ int initServer(int port = 12123)
     svr.Post("/compute/1h", handleSingleCompute);
     svr.Post("/compute/6h", handleComputePer6h);
     svr.Post("/cluster/feature", handleComputeFeatures);
+    svr.Post("/cluster/atom/feature", handleAtomFeatures);
 
     if (svr.listen("0.0.0.0", port)) {
         std::cout << "Server is running at http://localhost:12123" << std::endl;
@@ -182,7 +183,7 @@ std::vector<std::vector<Point>> generateTrajectories(int numTrajectories) {
     return trajectories;
 }
 
-int main(int argc,char* argv[]){
+int main4(int argc,char* argv[]){
 #if 1
     int port;
 
@@ -253,7 +254,7 @@ int main(int argc,char* argv[]){
 }
 
 
-int main4(void){
+int main(void){
 #if 1
     initServer(12123);
 #endif

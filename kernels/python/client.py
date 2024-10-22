@@ -307,12 +307,7 @@ def computefeatures(TrajGroups):
      
     return features
 
-
-
-
-
-
-TrajGroups,trajs2list = compute6h('/mnt/d/学习资料/气象数据/era5s/202303')
+TrajGroups,trajs2list = compute6h('/mnt/d/linux/linux/era5s/202303')
 # np.save('kernels/python/cache/TrajGroups.npy', TrajGroups)
 # TrajGroups = np.load('kernels/python/cache/TrajGroups.npy')
 features = computefeatures(TrajGroups)

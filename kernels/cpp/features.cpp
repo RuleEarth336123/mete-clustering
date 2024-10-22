@@ -1,12 +1,13 @@
 #include "features.h"
 #include <limits>
 #include <algorithm>
-
+#include "omp.h"
 void FeatureComputer::DtwCompute(const vector<vector<Point>>& trajectorys, vector<vector<float>> &output_matrix)
 {
     size_t N = trajectorys.size();
     output_matrix.resize(N, std::vector<float>(N, 0.0));
 
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < N; ++i) {
         for (size_t j = 0; j < N; ++j) {
             if (i != j) {
@@ -22,6 +23,7 @@ void FeatureComputer::CosCompute(const vector<vector<Point>> &trajectorys, vecto
     size_t N = trajectorys.size();
     output_matrix.resize(N, std::vector<float>(N, 0.0));
 
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < N; ++i) {
         for (size_t j = 0; j < N; ++j) {
             if (i != j) {
@@ -40,6 +42,7 @@ void FeatureComputer::DotCompute(const vector<vector<float>> &input_marix1, cons
     if(M != input_marix2.size() || N != input_marix2[0].size()){
         std::cerr << "the two matrix's shape is different." <<std::endl;
     }
+    #pragma omp parallel for collapse(2)
     for(int i = 0;i<M;i++){
         for(int j=0;j<N;j++){
             output_marix[i][j] = input_marix1[i][j] * input_marix2[i][j];
@@ -52,6 +55,7 @@ void FeatureComputer::NormalizeFeatures(const vector<vector<float>> &input_matri
     int numCols = input_matrix[0].size();
     feature_matrix.resize(numRows, std::vector<float>(numCols));
 
+    #pragma omp parallel for
     for (int i = 0; i < numRows; ++i) {
         float minElem = *std::min_element(input_matrix[i].begin(), input_matrix[i].end());
         float maxElem = *std::max_element(input_matrix[i].begin(), input_matrix[i].end());

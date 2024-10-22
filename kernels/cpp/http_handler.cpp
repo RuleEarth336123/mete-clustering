@@ -192,9 +192,97 @@ void handleComputeFeatures(const httplib::Request &req, httplib::Response &res)
             // 输出点的坐标
             //std::cout << "Point: (" << x << ", " << y << ", " << z << ")" << std::endl;
         }
+        //这里做一次检查
         inputMatrix.emplace_back(std::move(single_traj));
     }
 
+    std::unique_ptr<FeatureComputer> feature_ptr = std::make_unique<FeatureComputer>();
+
+    vector<vector<float>> distanceMatrix,normalizedMatrix,similarMatrix;
+    vector<vector<float>> output_marix;
+
+    feature_ptr->DtwCompute(inputMatrix,distanceMatrix);
+    feature_ptr->CosCompute(inputMatrix,similarMatrix);
+    feature_ptr->DotCompute(distanceMatrix,similarMatrix,output_marix);
+
+
+    feature_ptr->NormalizeFeatures(output_marix, normalizedMatrix);
+
+
+    vector<vector<json11::Json>> json_feature_list;
+
+    for (const auto& feature : normalizedMatrix) {
+        std::vector<json11::Json> json_feature;
+        for (const auto& value : feature) {
+            json_feature.push_back(value);
+        }
+        json_feature_list.push_back(json_feature);
+    }
+
+    // 创建响应的Json对象
+    json11::Json responseJson = json11::Json::object {
+        {"features", json_feature_list}
+    };
+
+    std::string response_string = responseJson.dump();
+    res.set_content(responseJson.dump(), "application/json");
+    std::cout << log(req,res) << std::endl;
+}
+
+void handleAtomFeatures(const httplib::Request &req, httplib::Response &res)
+{
+    string err;
+
+    Json requestJson = Json::parse(req.body, err);
+    if (!err.empty()) {
+        res.set_content("Invalid JSON", "text/plain");
+        res.status = 400; // Bad Request
+        return;
+    }
+
+    auto filePath = requestJson["filePath"].string_value();
+
+    std::ifstream file(filePath);
+    
+    if (!file.is_open()) {
+        std::cerr << "无法打开文件: " << filePath << std::endl;
+        return;
+    }
+
+    std::string jsonStr((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    file.close();
+
+    json11::Json readJson = json11::Json::parse(jsonStr,err);
+    if (readJson.is_null()) {
+        std::cerr << "解析 JSON 失败" << std::endl;
+        return;
+    }
+
+    const json11::Json::array& trajectories = readJson["trajectories"].array_items();
+    std::vector<std::vector<Point>> inputMatrix;
+    for (const auto& trajectory : trajectories) {
+        // 遍历轨迹中的点
+        std::vector<Point> single_traj;
+        for (const auto& point : trajectory.array_items()) {
+            // 获取点的坐标
+            float x = point[0].number_value();
+            float y = point[1].number_value();
+            float z = point[2].number_value();
+            Point loc(x, y, z);
+            single_traj.emplace_back(loc);
+            // 输出点的坐标
+            //std::cout << "Point: (" << x << ", " << y << ", " << z << ")" << std::endl;
+        }
+        for(int i = 0;i < single_traj.size()-1;i++){
+            float diff = single_traj[i+1].longitude - single_traj[i].longitude;
+            if(diff > 180){
+                single_traj[i+1].longitude -= 360.0;
+            }else if(diff < -180){
+                single_traj[i+1].longitude += 360.0;
+            }
+        }
+        inputMatrix.emplace_back(std::move(single_traj));
+    }
     std::unique_ptr<FeatureComputer> feature_ptr = std::make_unique<FeatureComputer>();
 
     vector<vector<float>> distanceMatrix,normalizedMatrix,similarMatrix;

@@ -16,5 +16,6 @@ std::string log(const httplib::Request &req, const httplib::Response &res);
 void handleSingleCompute(const httplib::Request &req, httplib::Response &res);
 void handleComputePer6h(const httplib::Request &req, httplib::Response &res);
 void handleComputeFeatures(const httplib::Request &req, httplib::Response &res);
+void handleAtomFeatures(const httplib::Request &req, httplib::Response &res);
 
 #endif
